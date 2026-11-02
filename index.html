@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Inspect the computed temporal hypergraph clusters, their actual members and source relations, and the algorithm that constructs the hierarchy.">
+  <title>Temporal Hypergraph Explorer — Ogtay Hasanov</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="site-ui.js" defer></script>
+  <script src="explorer.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#explore"><span class="brand-mark" aria-hidden="true">H</span><span>Temporal Hypergraph Explorer</span></a>
+    <nav aria-label="Main navigation"><a href="#explore">Explore the clusters</a><a href="#algorithm">Algorithm</a></nav>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">CONSTRUCTOR KNOWLEDGE DISCOVERY ASSESSMENT</p><h1 id="page-title">See what belongs together.<br>Inspect the evidence.</h1><p class="intro-copy">Explore the computed hierarchy at four publication cutoffs. Open a group to see its children, then inspect the original relations between its entities.</p></div>
+      <div class="run-note"><span class="status-dot" aria-hidden="true"></span><span>Computed results from the final v11 run<br><strong>Ogtay Hasanov</strong></span></div>
+    </section>
+
+    <section id="explore" aria-labelledby="explore-title">
+      <div id="constructor-cluster-explorer">
+        <div class="workspace-top">
+          <div><h2 id="explore-title">Explore the hierarchy</h2><p data-snapshot-meta>Loading the supplied research collection…</p></div>
+          <div class="viz-controls">
+            <label class="field-label">Publication cutoff<select class="form-select" data-year aria-label="Publication cutoff"><option>2020</option><option>2022</option><option>2024</option><option selected>2026</option></select></label>
+            <button type="button" class="btn btn-primary" data-example>Worked example <span aria-hidden="true">↗</span></button>
+          </div>
+        </div>
+        <div class="workspace">
+          <aside class="hierarchy-panel" aria-label="Hierarchy navigation">
+            <div class="panel-heading"><h3 data-list-title>Broad groups</h3><span data-list-count></span></div>
+            <p class="panel-hint" data-list-hint>Choose a group to look inside.</p>
+            <div class="child-list" data-children></div>
+          </aside>
+          <div class="graph-panel">
+            <div class="graph-heading"><div><p class="level-label" data-view-level>WHOLE HIERARCHY</p><h3 data-current-title>All broad groups</h3></div><button type="button" class="btn btn-quiet" data-up disabled>← Parent group</button></div>
+            <div class="breadcrumbs" data-breadcrumbs aria-label="Current hierarchy path"></div>
+            <p class="graph-description" data-graph-description>Each circle is a broad group. Circle area shows its number of entity members.</p>
+            <label class="sr-only" data-open-label>Inspect<select class="form-select" data-open aria-label="Open a group or select an entity"></select></label>
+            <div class="sr-only" data-path aria-live="polite"></div>
+            <div class="ce-chart"><svg role="img" aria-label="Computed cluster hierarchy"></svg><div class="hover-detail" data-hover hidden></div></div>
+            <div class="graph-bottom"><span data-current-count></span><span data-group-counts></span></div>
+            <div class="selection-line" data-selection aria-live="polite"></div>
+            <div class="evidence-panel" data-evidence hidden>
+              <div class="evidence-heading"><div><p class="level-label">SOURCE EVIDENCE</p><h4>One complete original relation</h4></div><label class="field-label">Choose a relation<select class="form-select" data-edge aria-label="Choose a raw hyperedge"></select></label></div>
+              <p class="source-line" data-source></p>
+              <ol class="endpoint-list" data-endpoints></ol>
+            </div>
+          </div>
+        </div>
+        <p class="reading-note"><strong>Reading the map.</strong> Groups are nested memberships. In a fine group, circles become individual entities and diamonds represent complete internal hyperedges. Relations that also touch entities outside that group are omitted. Positions organize the drawing and do not measure semantic similarity.</p>
+      </div>
+    </section>
+
+    <section id="algorithm" class="method-section" aria-labelledby="algorithm-title">
+      <div class="section-title"><p class="eyebrow">INPUT, PROCESS AND OUTPUT</p><h2 id="algorithm-title">How the hierarchy is constructed</h2><p>The input is an already extracted knowledge hypergraph. The algorithm groups entities using their recorded relations and, after the first snapshot, their earlier group memberships.</p></div>
+      <div class="algorithm-flow" role="group" aria-label="Algorithm input, processing steps and output">
+        <div class="flow-input"><p class="level-label">INPUT</p><h3>A dated hypergraph</h3><ul><li>Entity IDs and names</li><li>Multi-entity relation records</li><li>Each relation’s source paper and publication year</li></ul><p class="flow-extra">For cutoff <em>t</em>, retain relations asserted by papers published by <em>t</em>. Their endpoints define the current entity universe.</p></div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+        <div class="flow-process"><p class="level-label">ALGORITHM</p><ol class="process-list"><li><strong>Make structural features</strong><span>Build the node–relation incidence matrix and compress it with SVD, to rank at most 48.</span></li><li><strong>Initialize and refine fine groups</strong><span>Use k-means or earlier memberships. Move a unit only when its exact full objective gain is positive.</span></li><li><strong>Contract and repeat</strong><span>Build L1 from complete L2 groups, then L0 from complete L1 groups. A coarser move cannot split a child.</span></li><li><strong>Track and label</strong><span>Match group identities across snapshots and attach labels from the eligible source evidence.</span></li></ol></div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+        <div class="flow-output"><p class="level-label">OUTPUT FOR <span data-output-year>2026</span></p><h3>A nested map</h3><div class="output-tree"><div><strong data-output-l0>15</strong> broad groups <span>L0</span></div><div><strong data-output-l1>60</strong> middle groups <span>L1</span></div><div><strong data-output-l2>221</strong> fine groups <span>L2</span></div><div><strong data-output-n>5,798</strong> entity leaves <span>L3</span></div></div><p class="flow-extra">Also exported: labels, persistent group IDs, member flows and events.</p></div>
+      </div>
+      <div class="method-details"><div><h3>What earns a higher score?</h3><p>A relation earns observed credit when one group holds strictly more than half of its original endpoints. Modularity subtracts the expected credit under a degree-volume chance model. The selected objective adds a memory modularity term weighted by <strong>0.25</strong>.</p><p>Refinement stops after a sweep accepts no moves, or after four sweeps. This is finite greedy search.</p></div><div><h3>What survives contraction?</h3><p>If five endpoints are split between two groups as <strong>3 and 2</strong>, the contracted relation stores those same counts and the original arity <strong>5</strong>. Its observed credit stays <strong>3/5</strong> for the same grouping. Degree volumes also remain unchanged sums, so the full objective agrees.</p><p>Internal relations remain as loops. The guarantee applies to this objective for corresponding partitions.</p></div></div>
+      <div class="method-parameters"><span>Group caps: <strong>L0 ≤ 15 · L1 ≤ 60 · L2 ≤ 300</strong></span><span>Selected weights: <strong>κ = 0 · τ = 0.25</strong></span><span>Initialization seed: <strong>42</strong></span></div>
+      <p class="reading-note">The caps are maxima for the number of groups, not the number of entities in a group. The 2020 snapshot has no preceding-group memory. Display labels reproduce the frozen output, including broad groups marked “Mixed”; the visualization supplies no additional semantic validation.</p>
+    </section>
+  </main>
+  <footer><span>Ogtay Hasanov · Constructor Knowledge Discovery assessment</span><span>Frozen v11 memberships and source relations</span></footer>
+</body>
+</html>
